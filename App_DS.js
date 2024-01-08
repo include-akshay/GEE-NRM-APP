@@ -17,9 +17,20 @@
    
 */
 
+exports.hydroPanel = {"Precipitation":{},"Evapotranspiration":{},"Runoff":{},"Change in Groundwater":{},"Change in Well Depth":{}};
+exports.climatePanel = {"Drought Intensity":{}, "Drought Frequency":{}};
+exports.lulcPanel={};
+exports.climateYears = ["2016","2017","2018","2019","2020","2021","2022"]
+exports.lulcYears = ["2015","2016","2017","2018","2019","2020","2021","2022"]
+exports.lulcLevels = ["Level 1", "Level 2","Level 3"]
+exports.wellDepthLevels = ["2017-2022","2018-2023"]
 exports.layer = {
   "Mohanpur": {
     "Administrative Boundaries": [
+      {
+        label: "State",
+        value: ["projects/ee-jamuidemo/assets/All_All_State_Boundary", 0, {"lat" :24.5559, "long" : 84.67395}],
+      },
       {
         label: "Block",
         value: ["projects/ee-anz208490/assets/mohanpur_block_boundary", 0, {"lat" :24.5559, "long" : 84.67395}],
@@ -28,8 +39,33 @@ exports.layer = {
         label: "Panchayat",
         value: ["projects/ee-anz208490/assets/mohanpur_panchayats", 0, {"lat" :24.5559, "long" : 84.67395}],
       },
+      {
+        label: "Village",
+        value: ["projects/ee-akshay-jaskaran/assets/BiharVillageBoundaries", 0, {"lat" :24.5559, "long" : 84.67395}],
+      },
     ],
-    "Hydrological Layers": [],
+    "Hydrological Layers": [
+      {
+        label: "Precipitation",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_mohanpur_DG", 0, {"lat" :24.5559, "long" : 84.67395}],
+      },
+      {
+        label: "Evapotranspiration",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_mohanpur_DG", 0, {"lat" :24.5559, "long" : 84.67395}],
+      },
+      {
+        label: "Runoff",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_mohanpur_DG", 0,{"lat" :24.5559, "long" : 84.67395}],
+      },
+      {
+        label: "Change in Groundwater",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_mohanpur_DG", 0,{"lat" :24.5559, "long" : 84.67395}],
+      },
+      {
+        label : "Change in Well Depth",
+        value : ["projects/ee-dharmisha-siddharth/assets/WellDepths_Mohanpur", 0, {"lat" :24.5559, "long" : 84.67395}],
+      },
+      ],
     "Climate Variables": [
       {
         label: "Drought Intensity",
@@ -41,7 +77,12 @@ exports.layer = {
       },
     ],
     "NREGA welfare expenditure:" : [],
-    "Landscape variables:" : [],
+    "Landscape variables:" : [
+      {
+        label: "Land Use Land Cover",
+        value: ["projects/ee-rittwick-n-tirumal/assets/Mohanpur_2016-07-01_2017-06-30_LULCmap_30m",0, {"lat" :24.5559, "long" : 84.67395}],
+      },
+    ],
     "Socio - Economic Variables" : [],
     "Site suitability variables for RWH structures": [
       {
@@ -56,12 +97,20 @@ exports.layer = {
   "Masalia": {
     "Administrative Boundaries": [
       {
+        label: "State",
+        value: ["projects/ee-jamuidemo/assets/All_All_State_Boundary", 0, {"lat" :24.155945, "long" : 87.177757}],
+      },
+      {
         label: "Block",
         value: ["projects/ee-anz208490/assets/masalia_block_boundary", 0, {"lat" :24.155945, "long" : 87.177757}],
       },
       {
         label: "Panchayat",
         value: ["projects/ee-anz208490/assets/masalia_panchayats", 0, {"lat" :24.155945, "long" : 87.177757}],
+      },
+      {
+        label: "Village",
+        value: ["projects/ee-akshay-jaskaran/assets/JharkhandVillageBoundaries", 0, {"lat" :24.155945, "long" : 87.177757}],
       },
     ],
     "Hydrological Layers": [
@@ -81,6 +130,10 @@ exports.layer = {
         label: "Change in Groundwater",
         value: ["projects/ee-dharmisha-siddharth/assets/new_masalia_DG", 0, {"lat" :24.155945, "long" : 87.177757}],
       },
+      {
+        label : "Change in Well Depth",
+        value : ["projects/ee-dharmisha-siddharth/assets/WellDepths_Masalia", 0, {"lat" :24.155945, "long" : 87.177757}],
+      },
     ],
     "Climate Variables": [
       {
@@ -93,7 +146,12 @@ exports.layer = {
       },
     ],
     "NREGA welfare expenditure:" : [],
-    "Landscape variables:" : [],
+    "Landscape variables:" : [
+      {
+        label: "Land Use Land Cover",
+        value:["projects/ee-rittwick-n-tirumal/assets/Masalia_2016-07-01_2017-06-30_LULCmap_30m",0, {"lat" :24.155945, "long" : 87.177757}],
+      },
+    ],
     "Socio - Economic Variables" : [],
     "Site suitability variables for RWH structures": [
       {
@@ -108,6 +166,10 @@ exports.layer = {
   "Angul": {
     "Administrative Boundaries": [
       {
+        label: "State",
+        value: ["projects/ee-jamuidemo/assets/All_All_State_Boundary", 0, {"lat" : 20.8444033, "long" : 85.15108179999993}],
+      },
+      {
         label: "Block",
         value: ["projects/ee-anz208490/assets/angul_block_boundary", 0, {"lat" : 20.8444033, "long" : 85.15108179999993}],
       },
@@ -115,8 +177,32 @@ exports.layer = {
         label: "Panchayat",
         value: ["projects/ee-anz208490/assets/angul_panchayats", 0,{"lat" : 20.8444033, "long" : 85.15108179999993}],
       },
+      {
+        label: "Village",
+        value: ["projects/ee-akshay-jaskaran/assets/OdishaVillageBoundaries", 0, {"lat" : 20.8444033, "long" : 85.15108179999993}],
+      },
     ],
     "Hydrological Layers": [
+      {
+        label: "Precipitation",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_angul_DG", 0, {"lat" : 20.8444033, "long" : 85.15108179999993}],
+      },
+      {
+        label: "Evapotranspiration",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_angul_DG", 0, {"lat" : 20.8444033, "long" : 85.15108179999993}],
+      },
+      {
+        label: "Runoff",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_angul_DG", 0,{"lat" : 20.8444033, "long" : 85.15108179999993}],
+      },
+      {
+        label: "Change in Groundwater",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_angul_DG", 0,{"lat" : 20.8444033, "long" : 85.15108179999993}],
+      },
+      {
+        label : "Change in Well Depth",
+        value : ["projects/ee-dharmisha-siddharth/assets/WellDepths_Angul", 0, {"lat" : 20.8444033, "long" : 85.15108179999993}],
+      },
     ],
     "Climate Variables": [
       {
@@ -129,7 +215,12 @@ exports.layer = {
       },
     ],
     "NREGA welfare expenditure:" : [],
-    "Landscape variables:" : [],
+    "Landscape variables:" : [
+      {
+        label: "Land Use Land Cover",
+        value:["projects/ee-rittwick-n-tirumal/assets/Angul_2016-07-01_2017-06-30_LULCmap_30m",0, {"lat" : 20.8444033, "long" : 85.15108179999993}],
+      },
+    ],
     "Socio - Economic Variables" : [],
     "Site suitability variables for RWH structures": [
       {
@@ -143,6 +234,10 @@ exports.layer = {
   "Pindwara": {
     "Administrative Boundaries": [
       {
+        label: "State",
+        value: ["projects/ee-jamuidemo/assets/All_All_State_Boundary", 0, {"lat" : 24.84166, "long" : 73.08755}],
+      },
+      {
         label: "Block",
         value: ["projects/ee-anz208490/assets/pindwara_block_boundary", 0 , {"lat" : 24.84166, "long" : 73.08755}],
       },
@@ -150,8 +245,33 @@ exports.layer = {
         label: "Panchayat",
         value: ["projects/ee-anz208490/assets/pindwara_panchayats", 0, {"lat" : 24.84166, "long" : 73.08755}],
       },
+      {
+        label: "Village",
+        value: ["projects/ee-akshay-jaskaran/assets/RajasthanVillageBoundaries", 0, {"lat" : 24.84166, "long" : 73.08755}],
+      },
     ],
-    "Hydrological Layers": [],
+    "Hydrological Layers": [
+      {
+        label: "Precipitation",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_pindwara_DG", 0, {"lat" : 24.84166, "long" : 73.08755}],
+      },
+      {
+        label: "Evapotranspiration",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_pindwara_DG", 0, {"lat" : 24.84166, "long" : 73.08755}],
+      },
+      {
+        label: "Runoff",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_pindwara_DG", 0, {"lat" : 24.84166, "long" : 73.08755}],
+      },
+      {
+        label: "Change in Groundwater",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_pindwara_DG", 0, {"lat" : 24.84166, "long" : 73.08755}],
+      },
+      {
+        label : "Change in Well Depth",
+        value : ["projects/ee-dharmisha-siddharth/assets/WellDepths_Pindwara", 0, {"lat" : 24.84166, "long" : 73.08755}],
+      },
+      ],
     "Climate Variables": [
       {
         label: "Drought Intensity",
@@ -162,8 +282,14 @@ exports.layer = {
         value: ["projects/ee-rittwick-n-tirumal/assets/Pindwara_kharif_drought_frequency_intensity_2016_2022", 0, {"lat" : 24.84166, "long" : 73.08755}],
       },
     ],
+    
     "NREGA welfare expenditure:" : [],
-    "Landscape variables:" : [],
+    "Landscape variables:" : [
+      {
+        label: "Land Use Land Cover",
+        value:["projects/ee-rittwick-n-tirumal/assets/Pindwara_2016-07-01_2017-06-30_LULCmap_30m",0, {"lat" : 24.84166, "long" : 73.08755}],
+      },
+    ],
     "Socio - Economic Variables" : [],
     "Site suitability variables for RWH structures": [
       {
@@ -177,15 +303,44 @@ exports.layer = {
   "Mandalgarh": {
     "Administrative Boundaries": [
       {
+        label: "State",
+        value: ["projects/ee-jamuidemo/assets/All_All_State_Boundary", 0,  {"lat" : 25.22583, "long" : 75.11423}],
+      },
+      {
         label: "Block",
-        value: ["projects/ee-anz208490/assets/mandalgarh_block_boundary", 0,{"lat" : 25.22583, "long" : 75.11423}],
+        value: ["projects/ee-anz208490/assets/mandalgarh_block_boundary", 0, {"lat" : 25.22583, "long" : 75.11423}],
       },
       {
         label: "Panchayat",
         value: ["projects/ee-anz208490/assets/mandalgarh_panchayats", 0, {"lat" : 25.22583, "long" : 75.11423}],
       },
+      {
+        label: "Village",
+        value: ["projects/ee-akshay-jaskaran/assets/RajasthanVillageBoundaries", 0, {"lat" : 25.22583, "long" : 75.11423}],
+      },
     ],
-    "Hydrological Layers": [],
+    "Hydrological Layers": [
+      {
+        label: "Precipitation",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_mandalgarh_DG", 0,{"lat" : 25.22583, "long" : 75.11423}],
+      },
+      {
+        label: "Evapotranspiration",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_mandalgarh_DG", 0, {"lat" : 25.22583, "long" : 75.11423}],
+      },
+      {
+        label: "Runoff",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_mandalgarh_DG", 0, {"lat" : 25.22583, "long" : 75.11423}],
+      },
+      {
+        label: "Change in Groundwater",
+        value: ["projects/ee-dharmisha-siddharth/assets/new_mandalgarh_DG", 0,{"lat" : 25.22583, "long" : 75.11423}],
+      },
+      {
+        label : "Change in Well Depth",
+        value : ["projects/ee-dharmisha-siddharth/assets/WellDepths_Mandalgarh", 0, {"lat" : 25.22583, "long" : 75.11423}],
+      },
+      ],
     "Climate Variables": [
       {
         label: "Drought Intensity",
@@ -197,7 +352,12 @@ exports.layer = {
       },
     ],
     "NREGA welfare expenditure:" : [],
-    "Landscape variables:" : [],
+    "Landscape variables:" : [
+      {
+        label: "Land Use Land Cover",
+        value:["projects/ee-rittwick-n-tirumal/assets/Mandalgarh_2016-07-01_2017-06-30_LULCmap_30m",0,  {"lat" : 25.22583, "long" : 75.11423}],
+      },
+    ],
     "Socio - Economic Variables" : [],
     "Site suitability variables for RWH structures": [
       {
@@ -219,12 +379,11 @@ exports.layerCategory = [
   "Site suitability variables for RWH structures",
 ];
 
-exports.hydroPanel={"Precipitation":{},"Evapotranspiration":{},"Runoff":{},"Change in Groundwater":{},};
-exports.climatePanel = {"Drought Intensity":{}, "Drought Frequency":{}};
-exports.climateYears = ["2016","2017","2018","2019","2020","2021","2022"]
+
+
 exports.seasonDates = {
   'Kharif':{'2016-2017' : [],
-  '2017-2018' : ["2017-07ee-01","2017-07-15","2017-07-29","2017-08-12","2017-08-26","2017-09-09","2017-09-23", "2017-10-07","2017-10-21" ],
+  '2017-2018' : ["2017-07-01","2017-07-15","2017-07-29","2017-08-12","2017-08-26","2017-09-09","2017-09-23", "2017-10-07","2017-10-21" ],
   '2018-2019': ["2018-07-01","2018-07-15", "2018-07-29","2018-08-12","2018-08-26","2018-09-09","2018-09-23","2018-10-07","2018-10-21" ], 
   '2019-2020': ["2019-07-01","2019-07-15","2019-07-29","2019-08-12","2019-08-26","2019-09-09","2019-09-23","2019-10-07","2019-10-21"], 
   '2020-2021':["2020-07-01","2020-07-15","2020-07-29","2020-08-12","2020-08-26","2020-09-09","2020-09-23","2020-10-07","2020-10-21"],
