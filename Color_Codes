@@ -1,0 +1,193 @@
+exports.intensityPallete = ["FFFF00","FFA500","FF0000"];
+exports.intensityNames = ["0-1","1-2","2-3"];
+exports.frequencyPallete = ["FFDBAC","F1C27D","E0AC69","C68642","8D5524"];
+exports.clartPallete = ['000000', '5dca21', 'e0ef23', 'f44336', 'b313a7','0000FF'];
+exports.clartNames = [
+  'X',"High Recharge Area","Moderate Recharge Structure","Low Recharge Areas","Areas suitable for regeneration","High Run off zone"];
+exports.lithoPallete = ['006400', 'e6194B', 'f58231', 'ffe119', 'bfef45','3cb44b', '42d4f4', '4363d8', '911eb4', 'f032e6', 'a9a9a9'];
+exports.lithoNames = [
+  'X',"Alluvium","Granite","Schist","Gneiss","Phyllite","Quartz","Basalt","Sandstone","Shale","Laterite"];
+exports.lineamentPallete = ["000000","FFFFFF"]
+exports.lineamentNames = ["No Lineament", "Lineament"]
+exports.adiPallete = ["FF0000","FFFF00","00FF00"]
+exports.adiNames = ["ADI < 9(low)", "ADI = 9(medium)", "ADI > 9(high)"]
+exports.slopePercentagePallete = ['313695','4575b4','74add1','abd9e9','ffffbf','fee090','fdae61','f46d43','d73027','a50026'];
+exports.slopePercentageNames = ['V-shape river valleys, Deep narrow canyons', 'Lateral midslope incised drainages, Local valleys in plains',
+'Upland incised drainges Stream headwaters', 'U shape valleys', 'Broad Flat Areas','Broad open slopes', 'Flat ridge tops mesa tops',
+'Local ridge/ hilltops within broad valleys','Lateral midslope drainage divides, local ridges in plains','Mountain tops, high ridges'];
+exports.slopePallete = ['000000','313695','4575b4','74add1','abd9e9','ffffbf','fee090','fdae61','f46d43','d73027','a50026'];
+exports.slopeNames = ['X', 'V-shape river valleys, Deep narrow canyons', 'Lateral midslope incised drainages, Local valleys in plains',
+'Upland incised drainges Stream headwaters', 'U shape valleys', 'Broad Flat Areas','Broad open slopes', 'Flat ridge tops mesa tops',
+'Local ridge/ hilltops within broad valleys','Lateral midslope drainage divides, local ridges in plains','Mountain tops, high ridges'];
+exports.ddNames = ['X',"Low","Moderate","High"];
+exports.ddPallete=['FFFFFF', '000000', '0000FF', 'FF0000'];
+exports.precipitationPallete = ['9bb7ff','82a4ff','6892ff','356dff','0248ff'];
+exports.runoffPallete = ['F6BDC0','F1959B','F07470','EA4C46','DC1C13'];
+exports.evapotranspirationPallete = ['A847DB','973FC4','6F2F91','582572','401B53'];
+exports.chgPallete = ['1E90FC','246FF0','2A4EE5','302DD9','360CCD'];
+exports.chwdNames = ['Drop > 5m', ' 1m < Drop < 5m','Between Drop 1 and Rise 1m','Rise > 1m' ];
+exports.chwdPallete = ['FF0000','FFA500','00FF00','0000FF'];
+exports.hydroColorCoding = {
+  // Blue
+  'Precipitation': {
+    '0.0' : {fillColor: '#9bb7ff',lineType:'dashed'},
+    '1.0' : {fillColor: '#82a4ff',lineType:'dashed'},
+    '2.0' : {fillColor: '#6892ff',lineType:'dashed'},
+    '3.0' : {fillColor: '#356dff',lineType:'dashed'},
+    '4.0' : {fillColor: '#0248ff',lineType:'dashed'},
+  },
+  // Red
+  'Runoff': {
+    '0.0' : {fillColor: '#F6BDC0',lineType:'dashed'},
+    '1.0' : {fillColor: '#F1959B',lineType:'dashed'},
+    '2.0' : {fillColor: '#F07470',lineType:'dashed'},
+    '3.0' : {fillColor: '#EA4C46',lineType:'dashed'},
+    '4.0' : {fillColor: '#DC1C13',lineType:'dashed'},
+  },
+  //Purple
+  'Evapotranspiration': {
+    '0.0' : {fillColor: '#A847DB',lineType:'dashed'},
+    '1.0' : {fillColor: '#973FC4',lineType:'dashed'},
+    '2.0' : {fillColor: '#6F2F91',lineType:'dashed'},
+    '3.0' : {fillColor: '#582572',lineType:'dashed'},
+    '4.0' : {fillColor: '#401B53',lineType:'dashed'},
+  },
+  // Blue
+
+  'Change in Groundwater': {
+    '0.0' : {fillColor: '#1E90FC',lineType:'dashed'},
+    '1.0' : {fillColor: '#246FF0',lineType:'dashed'},
+    '2.0' : {fillColor: '#2A4EE5',lineType:'dashed'},
+    '3.0' : {fillColor: '#302DD9',lineType:'dashed'},
+    '4.0' : {fillColor: '#360CCD',lineType:'dashed'},
+  },
+  //Brown
+  'Change in Well Depth': {
+    '0.0' : {fillColor: '#FF0000',lineType:'dashed'},
+    '1.0' : {fillColor: '#FFA500',lineType:'dashed'},
+    '2.0' : {fillColor: '#00FF00',lineType:'dashed'},
+    '3.0' : {fillColor: '#0000FF',lineType:'dashed'},
+  },
+}
+
+exports.lulc_levelI =
+'<RasterSymbolizer>' +
+  '<ColorMap type="intervals" extended="false">' +
+  '<ColorMapEntry color="#000000" quantity="0" label="background"/>' +
+  '<ColorMapEntry color="#ff0000" quantity="1" label="Built up"/>' +
+    '<ColorMapEntry color="#74ccf4" quantity="2" label="Water"/>' +
+    '<ColorMapEntry color="#74ccf4" quantity="3" label="Water"/>' +
+    '<ColorMapEntry color="#74ccf4" quantity="4" label="Water"/>' +
+    '<ColorMapEntry color="#00A300" quantity="5" label="Croplands"/>' +
+    '<ColorMapEntry color="#00A300" quantity="6" label="Non - Croplands"/>' +
+    '<ColorMapEntry color="#A9A9A9" quantity="7" label="Barren"/>' +
+    '<ColorMapEntry color="#00A300" quantity="8" label="Single Kharif Cropping"/>' +
+    '<ColorMapEntry color="#00A300" quantity="9" label="Single Non Kharif Cropping"/>' +
+    '<ColorMapEntry color="#00A300" quantity="10" label="Double Cropping"/>' +
+    '<ColorMapEntry color="#00A300" quantity="11" label="Triple Cropping"/>' +
+  '</ColorMap>' +
+'</RasterSymbolizer>';
+exports.level1Pallete = ['ff0000','74ccf4','A9A9A9','00A300' ];
+exports.level1Names = ['Built up', 'Water','Barren','Greenery ' ];
+
+exports.lulc_levelII =
+'<RasterSymbolizer>' +
+  '<ColorMap type="intervals" extended="false">' +
+  '<ColorMapEntry color="#000000" quantity="0" label="background"/>' +
+  '<ColorMapEntry color="#000000" quantity="1" label="Built up"/>' +
+    '<ColorMapEntry color="#000000" quantity="2" label="Water"/>' +
+    '<ColorMapEntry color="#000000" quantity="3" label="Water"/>' +
+    '<ColorMapEntry color="#000000" quantity="4" label="Water"/>' +
+    '<ColorMapEntry color="#f1c232" quantity="5" label="Croplands"/>' +
+    '<ColorMapEntry color="#38761d" quantity="6" label="Forest"/>' +
+    '<ColorMapEntry color="#000000" quantity="7" label="Barren"/>' +
+    '<ColorMapEntry color="#f1c232" quantity="8" label="Single Kharif Cropping"/>' +
+    '<ColorMapEntry color="#f1c232" quantity="9" label="Single Non Kharif Cropping"/>' +
+    '<ColorMapEntry color="#f1c232" quantity="10" label="Double Cropping"/>' +
+    '<ColorMapEntry color="#f1c232" quantity="11" label="Triple Cropping"/>' +
+  '</ColorMap>' +
+'</RasterSymbolizer>';
+exports.level2Pallete = ['f1c232','38761d' ];
+exports.level2Names = ['Cropping Area', 'Forest Area'];
+
+exports.lulc_levelIII =
+'<RasterSymbolizer>' +
+  '<ColorMap type="intervals" extended="false">' +
+  '<ColorMapEntry color="#000000" quantity="0" label="background"/>' +
+  '<ColorMapEntry color="#000000" quantity="1" label="Built up"/>' +
+    '<ColorMapEntry color="#000000" quantity="2" label="Water"/>' +
+    '<ColorMapEntry color="#000000" quantity="3" label="Water"/>' +
+    '<ColorMapEntry color="#000000" quantity="4" label="Water"/>' +
+    '<ColorMapEntry color="#000000" quantity="5" label="Croplands"/>' +
+    '<ColorMapEntry color="#000000" quantity="6" label="Non - Croplands"/>' +
+    '<ColorMapEntry color="#000000" quantity="7" label="Barren"/>' +
+    '<ColorMapEntry color="#f1c232" quantity="8" label="Single Kharif Cropping"/>' +
+    '<ColorMapEntry color="#f59d22" quantity="9" label="Single Non Kharif Cropping"/>' +
+    '<ColorMapEntry color="#e68600" quantity="10" label="Double Cropping"/>' +
+    '<ColorMapEntry color="#b3561d" quantity="11" label="Triple Cropping"/>' +
+  '</ColorMap>' +
+'</RasterSymbolizer>';
+exports.level3Pallete = ['f1c232','f59d22','e68600','b3561d' ];
+exports.level3Names = ['Single Kharif Cropping', 'Single Non Kharif Cropping','Double Cropping','Triple Cropping'];
+
+exports.lithology_colors =
+'<RasterSymbolizer>' +
+  '<ColorMap type="intervals" extended="false">' +
+    '<ColorMapEntry color="#e6194B" quantity="1" label="Alluvium"/>' +
+    '<ColorMapEntry color="#f58231" quantity="2" label="Granite"/>' +
+    '<ColorMapEntry color="#ffe119" quantity="3" label="Schist"/>' +
+    '<ColorMapEntry color="#bfef45" quantity="4" label="Gneiss"/>' +
+    '<ColorMapEntry color="#3cb44b" quantity="5" label="Phyllite"/>' +
+    '<ColorMapEntry color="#42d4f4" quantity="6" label="Quartz"/>' +
+    '<ColorMapEntry color="#4363d8" quantity="7" label="Basalt"/>' +
+    '<ColorMapEntry color="#911eb4" quantity="8" label="Sandstone"/>' +
+    '<ColorMapEntry color="#f032e6" quantity="9" label="Shale"/>' +
+    '<ColorMapEntry color="#a9a9a9" quantity="10" label="Laterite"/>' +
+  '</ColorMap>' +
+'</RasterSymbolizer>';
+
+
+exports.lineaments_colors =
+'<RasterSymbolizer>' +
+  '<ColorMap type="intervals" extended="false">' +
+    '<ColorMapEntry color="#000000" quantity="0" label="No Lineament"/>' +
+    '<ColorMapEntry color="#FFFFFF" quantity="1" label="Lineament"/>' +
+  '</ColorMap>' +
+'</RasterSymbolizer>';
+
+
+exports.clart_colors =
+'<RasterSymbolizer>' +
+  '<ColorMap type="intervals" extended="false">' +
+    '<ColorMapEntry color="#5dca21" quantity="1" label="High Recharge Area"/>' +
+    '<ColorMapEntry color="#e0ef23" quantity="2" label="Moderate Recharge Structure"/>' +
+    '<ColorMapEntry color="#f44336" quantity="3" label="Low Recharge Areas"/>' +
+    '<ColorMapEntry color="#b313a7" quantity="4" label="Areas suitable for regeneration"/>' +
+    '<ColorMapEntry color="#0000FF" quantity="5" label="High Run off zone"/>' +
+  '</ColorMap>' +
+'</RasterSymbolizer>';
+
+exports.drainage_colors =
+'<RasterSymbolizer>' +
+  '<ColorMap type="intervals" extended="false">' +
+    '<ColorMapEntry color="#000000" quantity="1" label="Low"/>' +
+    '<ColorMapEntry color="#0000FF" quantity="2" label="Moderate"/>' +
+    '<ColorMapEntry color="#FF0000" quantity="3" label="High"/>' +
+  '</ColorMap>' +
+'</RasterSymbolizer>';
+
+exports.slopePercentage_colors = 
+'<RasterSymbolizer>' +
+  '<ColorMap type="intervals" extended="false">' +
+  '<ColorMapEntry color="#313695" quantity="1" label="V-shape river valleys, Deep narrow canyons"/>' +
+    '<ColorMapEntry color="#4575b4" quantity="2" label="Lateral midslope incised drainages, Local valleys in plains"/>' +
+    '<ColorMapEntry color="#74add1" quantity="3" label="Upland incised drainges Stream headwaters"/>' +
+    '<ColorMapEntry color="#abd9e9" quantity="4" label="U shape valleys"/>' +
+    '<ColorMapEntry color="#ffffbf" quantity="5" label="Broad Flat Areas"/>' +
+    '<ColorMapEntry color="#fee090" quantity="6" label="Broad open slopes"/>' +
+    '<ColorMapEntry color="#fdae61" quantity="7" label="Flat ridge tops mesa tops"/>' +
+    '<ColorMapEntry color="#f46d43" quantity="8" label="Local ridge/ hilltops within broad valleys"/>' +
+    '<ColorMapEntry color="#d73027" quantity="9" label="Lateral midslope drainage divides, local ridges in plains"/>' +
+    '<ColorMapEntry color="#a50026" quantity="10" label="Mountain tops, high ridges"/>' +
+  '</ColorMap>' +
+'</RasterSymbolizer>';
