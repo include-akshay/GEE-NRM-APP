@@ -1,0 +1,1668 @@
+var idxOfLocation,curState, curDistrict;
+var imports_App_DS = require('users/mtpictd/a_j:AppFiles/App_DS');
+var imports_Color_Codes = require('users/mtpictd/a_j:AppFiles/Color_Codes');
+var imports_Panels = require('users/mtpictd/a_j:AppFiles/initPanels');
+var layerCategory = imports_App_DS.layerCategory;
+var layers = imports_App_DS.layer;
+var hydroPanel = imports_App_DS.hydroPanel;
+var climatePanel = imports_App_DS.climatePanel;
+var climateYears = imports_App_DS.climateYears;
+var seasonDates = imports_App_DS.seasonDates;
+var landscapePanel = imports_App_DS.landscapePanel;
+var rwhPanel = imports_App_DS.rwhPanel;
+var lulcYears = imports_App_DS.lulcYears;
+var droughtYears = imports_App_DS.droughtYears;
+var lulcLevels = imports_App_DS.lulcLevels;
+var climateLevels = imports_App_DS.lulcLevels;
+var socioPanel = imports_App_DS.socioPanel;
+var socioYears = imports_App_DS.socioYears;
+var wellDepthLevels = imports_App_DS.wellDepthLevels;
+var hydroColorCoding = imports_Color_Codes.hydroColorCoding;
+var lulc_levelI = imports_Color_Codes.lulc_levelI;
+var lulc_levelII = imports_Color_Codes.lulc_levelII;
+var lulc_levelIII = imports_Color_Codes.lulc_levelIII;
+var clart_sld = imports_Color_Codes.clart_colors;
+var slopePercentage_colors = imports_Color_Codes.slopePercentage_colors;
+var clartPallete = imports_Color_Codes.clartPallete;
+var clartNames = imports_Color_Codes.clartNames;
+var frequencyPallete = imports_Color_Codes.frequencyPallete;
+var lithoPallete = imports_Color_Codes.lithoPallete;
+var lithoNames = imports_Color_Codes.lithoNames;
+var intensityPallete = imports_Color_Codes.intensityPallete;
+var intensityNames = imports_Color_Codes.intensityNames;
+var lineamentPallete = imports_Color_Codes.lineamentPallete;
+var lineamentNames = imports_Color_Codes.lineamentNames;
+var adiPallete = imports_Color_Codes.adiPallete;
+var adiNames = imports_Color_Codes.adiNames;
+var level1Pallete = imports_Color_Codes.level1Pallete;
+var level1Names = imports_Color_Codes.level1Names;
+var level2Pallete = imports_Color_Codes.level2Pallete;
+var level2Names = imports_Color_Codes.level2Names;
+var level3Pallete = imports_Color_Codes.level3Pallete;
+var level3Names = imports_Color_Codes.level3Names;
+var ddPallete = imports_Color_Codes.ddPallete;
+var ddNames = imports_Color_Codes.ddNames;
+var precipitationPallete = imports_Color_Codes.precipitationPallete;
+var chwdNames = imports_Color_Codes.chwdNames;
+var evapotranspirationPallete = imports_Color_Codes.evapotranspirationPallete;
+var runoffPallete = imports_Color_Codes.runoffPallete;
+var chgPallete = imports_Color_Codes.chgPallete;
+var chwdPallete = imports_Color_Codes.chwdPallete;
+var litho_sld = imports_Color_Codes.lithology_colors;
+var lin_sld = imports_Color_Codes.lineaments_colors;
+var slopePercentagePallete = imports_Color_Codes.slopePercentagePallete;
+var slopePercentageNames = imports_Color_Codes.slopePercentageNames;
+var slopePallete = imports_Color_Codes.slopePallete;
+var slopeNames = imports_Color_Codes.slopeNames;
+var drainage_colors = imports_Color_Codes.drainage_colors
+var waterBody = imports_App_DS.waterBody;
+var Mohanpur = ee.FeatureCollection("projects/ee-priyadarshini/assets/Gaya_Mohanpur");
+var l1 = imports_App_DS.l1;
+
+//var initLulcPanel = imports_Panels.initLulcPanel;
+var hydrologicalYears = ['2017-2018','2018-2019','2019-2020','2020-2021','2021-2022','2022-2023']
+var seasons = ['Kharif','Rabi','Zaid']
+
+// DATA
+
+function getTypesForState(selectedState) {
+  var typeMappings = {
+    "Bihar": ["Gaya"],
+    "Jharkhand": ["Dumka"],
+    "Odisha": ["Angul"],
+    "Rajasthan": ["Sirohi", "Bhilwara"],
+    "Madhya pradesh":["Guna"],
+  };
+
+  return typeMappings[selectedState] || [];
+}
+
+function getTypesForDistrict(selectedDistrict) {
+  var typeMappings2 = {
+    "Gaya": ["Mohanpur"],
+    "Dumka": ["Masalia"],
+    "Angul": ["Angul"],
+    "Sirohi": ["Pindwara"],
+    "Bhilwara" : ["Mandalgarh"],
+    "Guna":["Bamori"],
+  };
+
+  return typeMappings2[selectedDistrict] || [];
+}
+
+// Functions to populate the dropdown boxes.
+function populateTypeOfStateSelect(selectedState){
+  var types = getTypesForState(selectedState);
+  var updatedTypeOfData = ui.Select({
+    items: types,
+    placeholder: "Select District",
+    onChange: function (district) {
+      curDistrict = district;
+      clearMap();
+      populateTypeOfDataSelect(district);
+      
+    },
+  });
+
+  // Replace the existing typeOfData widget with the updated one
+  panel.widgets().set(2, updatedTypeOfData);
+}
+function populateTypeOfDataSelect(selectedDistrict) {
+  var types = getTypesForDistrict(selectedDistrict);
+  var updatedTypeOfData2 = ui.Select({
+    items: types,
+    placeholder: "Select Block",
+    onChange: function (block) {
+      idxOfLocation = block;
+      clearMap();
+      createCheckboxesWithOnClickFunctions();
+    },
+  });
+
+  // Replace the existing typeOfBlock widget with the updated one
+  panel.widgets().set(3, updatedTypeOfData2);
+}
+
+var typeOfBlock = ui.Select({
+  items: [],
+  placeholder: "Select Block",
+});
+
+var typeOfDistrict = ui.Select({
+  items: [],
+  placeholder: "Select District",
+});
+
+typeOfBlock.setDisabled(1);
+typeOfDistrict.setDisabled(1);
+
+var nameOfData = ui.Select({
+  items: ["Bihar", "Jharkhand", "Odisha", "Rajasthan","Madhya pradesh"],
+  placeholder: "Select State",
+  onChange: function (state) {
+    curState = state;
+    clearMap();
+    populateTypeOfStateSelect(state);
+    // populateTypeOfDataSelect(state);
+    typeOfDistrict.setDisabled(0);
+    typeOfBlock.setDisabled(0);
+    panel.widgets().set(3, typeOfBlock);
+  },
+});
+
+var clearMap = function(val){
+  subPanel.clear();
+  panel.remove(subPanel);
+  panel.add(subPanel);
+  Map.clear();
+  hydroPanel = {"Precipitation":{},"Evapotranspiration":{},"Runoff":{},"Change in Groundwater":{},"Change in Well Depth":{}, "Drainage Lines":{}};
+  climatePanel = {"Drought Intensity":{}, "Drought Frequency":{}};
+  socioPanel = {"Village ADI":{},"Block ADI":{},"District ADI":{},"Panchayat ADI":{},"State ADI":{}};
+  landscapePanel={"Land Use Land Cover":{},"Water Body":{}};
+  rwhPanel = {"Clart":{},"Lithology":{},"Drainage Density":{},"Slope Percentage":{},"Lineament":{}};
+}
+
+var subPanel = ui.Panel();
+
+var blog_label = ui.Label({
+  value: "Drop Down",
+  style: { fontWeight: "bold" },
+});
+var panel = ui.Panel(
+  [blog_label, nameOfData, typeOfDistrict, typeOfBlock],
+  ui.Panel.Layout.flow("vertical")
+);
+
+panel.style().set({ width: "325px" }, { position: "top-right" });
+
+// ----------------x------------------x--------------------x----------------x----------------
+
+//******************************** INIT PANELS **********************************
+var initYearPanel = function(inputData,layer){
+  hydroPanel[layer]['yearPanel'] = ui.Select({
+    items: hydrologicalYears,
+    placeholder: "Select a year",
+    onChange: function(key) {
+      if( hydroPanel[layer]['seasonPanel'])
+        hydroPanel[layer]['panel'].remove(hydroPanel[layer]['seasonPanel'])
+      hydroPanel[layer]['seasonPanel'] = ui.Select({
+        items: seasons,
+        placeholder: "Select a season",
+        onChange: function(key) {
+          removeLayer(inputData);
+          var layerURL = ee.FeatureCollection(inputData.value[0]);
+          var selectedYear = hydroPanel[layer]['yearPanel'].getValue();
+          var selectedSeason = hydroPanel[layer]['seasonPanel'].getValue();
+          //print(ee.String(layerURL.first().get('2017-07-01')).decodeJSON() )
+          var layerCollection = getLayer(layerURL,selectedYear,selectedSeason);
+          hydroChart(layerURL,layer);
+          var colorCodedCollection = colorCoding(layerCollection,inputData.label)
+          Map.addLayer(colorCodedCollection, {}, inputData.label);
+          Map.setCenter(inputData.value[2].long, inputData.value[2].lat, 10);
+          inputData.value[1] = 1;
+        }
+      });
+      hydroPanel[layer]['panel'].add(hydroPanel[layer]['seasonPanel']);
+    }
+  });
+  hydroPanel[layer]['panel'].add(hydroPanel[layer]['yearPanel']);
+}
+
+var initLulcPanel = function(inputData,layer){
+  landscapePanel[layer]['yearPanel'] = ui.Select({
+    items: lulcYears,
+    onChange: function(key) {
+      if( landscapePanel[layer]['seasonPanel'])
+        landscapePanel[layer]['panel'].remove(landscapePanel[layer]['seasonPanel'])
+      landscapePanel[layer]['seasonPanel'] = ui.Select({
+        items: lulcLevels,
+        onChange: function(key) {
+          removeLayer(inputData);
+          var selectedYear = landscapePanel[layer]['yearPanel'].getValue();
+          var selectedLevel = landscapePanel[layer]['seasonPanel'].getValue();
+          var url = inputData.value[0];
+          url = url.replace("xxxx",selectedYear);
+          url = url.replace("yyyy",String(parseInt(selectedYear)+1))
+          // print(url);
+          var layerURL = ee.Image.load(url);
+          var intervals,to,from=[0,1,2,3,4,5,6,7,8,9,10,11];
+          if(selectedLevel==="Level 1"){
+            to = [0,1,2,3,4,5,6,7,8,9,10,11];
+            intervals = lulc_levelI;
+            addLegend("LULC Level-1 Legend",level1Pallete,level1Names,"Land Use Land Cover","lulc")
+          }
+          else if(selectedLevel==="Level 2"){
+            to=[0,0,0,0,0,5,6,0,8,9,10,11];
+            intervals = lulc_levelII;
+            addLegend("LULC Level-2 Legend",level2Pallete,level2Names,"Land Use Land Cover","lulc")
+          }
+          else if(selectedLevel==="Level 3"){
+            to=[0,0,0,0,0,0,0,0,8,9,10,11];
+            intervals = lulc_levelIII;
+            addLegend("LULC Level-3 Legend",level3Pallete,level3Names,"Land Use Land Cover","lulc")
+          }
+          layerURL = layerURL.remap(from,to);
+          Map.addLayer(layerURL.selfMask().sldStyle(intervals),{}, inputData.label);
+          Map.setCenter(inputData.value[2].long, inputData.value[2].lat, 10);
+          inputData.value[1] = 1;
+        }
+      });
+      landscapePanel[layer]['panel'].add(landscapePanel[layer]['seasonPanel']);
+    }
+  });
+  landscapePanel[layer]['panel'].add(landscapePanel[layer]['yearPanel']);
+}
+
+var initFrequencyPanel = function(inputData,layer){
+  climatePanel[layer]['yearPanel'] = ui.Select({
+    items: climateYears,
+    placeholder : "Select a year",
+    onChange: function(key) {
+      if( climatePanel[layer]['seasonPanel'])
+        climatePanel[layer]['panel'].remove(climatePanel[layer]['seasonPanel'])
+      climatePanel[layer]['seasonPanel'] = ui.Select({
+        items: ["Mild","Moderate","Severe"],
+        onChange: function(key) {
+          removeLayer(inputData);
+          var layerURL = ee.FeatureCollection(inputData.value[0]);
+          var selectedYear = climatePanel[layer]['yearPanel'].getValue();
+          var selectedLevel = climatePanel[layer]['seasonPanel'].getValue();
+          droughtChart(layerURL,layer);
+          layerURL = colorCodingFrequency(layerURL,selectedYear,selectedLevel);
+          Map.addLayer(layerURL,{}, inputData.label);
+          Map.setCenter(inputData.value[2].long, inputData.value[2].lat, 10);
+          inputData.value[1] = 1;
+        }
+      });
+      climatePanel[layer]['panel'].add(climatePanel[layer]['seasonPanel']);
+    }
+  });
+  climatePanel[layer]['panel'].add(climatePanel[layer]['yearPanel']);
+}
+
+var initIntensityPanel = function(inputData,layer){
+  climatePanel[layer]['yearPanel'] = ui.Select({
+    items: climateYears,
+    placeholder:"Select a year",
+    onChange: function(key) {
+      removeLayer(inputData);
+      var layerURL = ee.FeatureCollection(inputData.value[0]);
+      var selectedYear = climatePanel[layer]['yearPanel'].getValue();
+      droughtChart(layerURL,layer);
+      layerURL = colorCodingIntensity(layerURL,"intensity_th_2_"+selectedYear);
+      Map.addLayer(layerURL,{},layer);
+      addLegend("Drought Intensity Legend",intensityPallete,intensityNames,"Drought Intensity","climate")
+      Map.setCenter(inputData.value[2]['long'], inputData.value[2]['lat'], 10);
+      inputData.value[1] = 1;
+    }
+  });
+  climatePanel[layer]['panel'].add(climatePanel[layer]['yearPanel']);
+}
+
+var initSocioPanel = function(inputData,layer){
+  socioPanel[layer]['yearPanel'] = ui.Select({
+    items: socioYears,
+    placeholder:"Select a year",
+    onChange: function(key) {
+      removeLayer(inputData);
+      var layerURL = ee.FeatureCollection(inputData.value[0]);
+      var selectedYear = socioPanel[layer]['yearPanel'].getValue();
+      var property = "ADI " + selectedYear;
+      if(inputData.label==='Village ADI'){
+        var toSearch=idxOfLocation
+        if(toSearch==="Angul")
+          toSearch="Anugul"
+        layerURL = layerURL.filter(ee.Filter.eq('Block_Name', toSearch));
+        property = property.replace(" ","_");
+      }
+      socioChart(layerURL,layer);
+      layerURL = colorCodingSocioEconomic(layerURL,property);
+      Map.addLayer(layerURL,{},layer);
+      addLegend(inputData.label+" Legend",adiPallete,adiNames,inputData.label,"socioEconomic")
+      Map.setCenter(inputData.value[2]['long'], inputData.value[2]['lat'], 10);
+      inputData.value[1] = 1;
+    }
+  });
+  socioPanel[layer]['panel'].add(socioPanel[layer]['yearPanel']);
+}
+
+var initWellDepthPanel = function(inputData,layer){
+  hydroPanel[layer]['yearPanel'] = ui.Select({
+    items: wellDepthLevels,
+    placeholder: "Select a year",
+    onChange: function(key) {
+      removeLayer(inputData);
+      var layerURL = ee.FeatureCollection(inputData.value[0]);
+      var selectedYear = hydroPanel[layer]['yearPanel'].getValue();
+      var propertyValue = "WellDepthNet2018_2023"
+      if(selectedYear === "2017-2022")
+        propertyValue = "WellDepthNet2017_2022";
+      var colorCodedCollection = colorCodingWellDepth(layerURL,propertyValue)
+      addLegend("Change in Well Depth(in meters)",chwdPallete,chwdNames,"Change in Well Depth","hydro")
+      Map.addLayer(colorCodedCollection, {}, inputData.label);
+      Map.setCenter(inputData.value[2]['long'], inputData.value[2]['lat'], 10);
+      inputData.value[1] = 1;
+    }
+  });
+  hydroPanel[layer]['panel'].add(hydroPanel[layer]['yearPanel']);
+}
+
+
+
+//***************** FUNCTIONS FOR POPULting the checkboxes **********************************
+
+function removeLayer(inputData,year){
+  var layers = Map.layers();
+  layers.forEach(function ($layer) {
+    if ($layer.getName() === inputData.label) {
+      Map.layers().remove($layer);
+      if(hydroPanel[inputData.label]){
+        chartRemover(hydroPanel,inputData);
+        Map.remove(hydroPanel[inputData.label]['legend'])
+      }
+      if(inputData.label==="Water Body" || inputData.label==="Land Use Land Cover"){
+         chartRemover(landscapePanel,inputData)
+      }
+      if(inputData.label==="Block ADI" || inputData.label==="Panchayat ADI" || inputData.label==="Village ADI"){
+         chartRemover(socioPanel,inputData)
+      }
+      if(inputData.label==="Clart" || inputData.label==="Lithology" || inputData.label==="Drainage Density" || inputData.label==="Lineament" || inputData.label==="Slope Percentage"){
+        var curLabel = inputData.label+"remove";
+        chartRemover(rwhPanel,inputData)
+        Map.layers().forEach(function ($$layer){
+          if($$layer.getName()===curLabel)
+            Map.layers().remove($$layer)
+        });
+      }
+      
+      if(inputData.label==="Drought Intensity" ||inputData.label==="Drought Frequency" )
+        chartRemover(climatePanel,inputData)
+      
+      if(inputData.label==="Block ADI" || inputData.label==="Panchayat ADI" || inputData.label==="Village ADI" || inputData.label==="District ADI")
+        chartRemover(socioPanel,inputData);
+      
+      if(year!== "0")
+        inputData.value[1] = 0;
+      else
+        inputData.value.year[1]=0;
+    }
+  });
+}
+function chartRemover(cPanel,inputData){
+  if(cPanel[inputData.label]['chartPanel'])
+    Map.remove(cPanel[inputData.label]['chartPanel']);
+  if(cPanel[inputData.label]['onClickID'])
+    Map.unlisten(cPanel[inputData.label]['onClickID']);
+  if(cPanel[inputData.label]['legend'])
+    Map.remove(cPanel[inputData.label]['legend']);
+}
+
+function createCheckboxesWithOnClickFunctions() {
+  
+  var inputData = layers[idxOfLocation];
+ 
+  for (var i = 0; i < layerCategory.length; i++) {
+    var Label = ui.Label(layerCategory[i]);
+    subPanel.add(Label);
+    for (var j = 0; j < inputData[layerCategory[i]].length; j++) {
+      var layer = inputData[layerCategory[i]][j].label;
+      var checkbox;
+      if(layerCategory[i]==='Administrative Boundaries'){
+        checkbox = ui.Checkbox(inputData[layerCategory[i]][j].label, false);
+        checkbox.onChange(createAdministrativeClickHandler(inputData[layerCategory[i]][j]));
+        subPanel.add(checkbox);
+      }
+      else if(layerCategory[i]==='Hydrological Boundaries'){
+        checkbox = ui.Checkbox(inputData[layerCategory[i]][j].label, false);
+        checkbox.onChange(createClickHandler(inputData[layerCategory[i]][j]));
+        subPanel.add(checkbox);
+      }
+      else if(layerCategory[i]==='Hydrological Layers'){
+        hydroPanel[layer]['panel'] = ui.Panel();
+        checkbox = ui.Checkbox(layer, false);
+        if(layer==='Change in Well Depth')
+          checkbox.onChange(createWellDepthClickHandler(inputData[layerCategory[i]][j],layer))
+        else if(layer==="Drainage Lines")
+          checkbox.onChange(createDrainageLinesClickHandler(inputData[layerCategory[i]][j],layer))
+        else
+          checkbox.onChange(createHydrologicalLayerClickHandler(inputData[layerCategory[i]][j],layer));
+        hydroPanel[layer]['panel'].add(checkbox);
+        subPanel.add(hydroPanel[layer]['panel']);
+      }
+      else if(layerCategory[i]==='Climate Variables'){
+        climatePanel[layer]['panel'] = ui.Panel();
+        checkbox = ui.Checkbox(layer, false);
+        checkbox.onChange(createClimateVariableClickHandler(inputData[layerCategory[i]][j],layer));
+        climatePanel[layer]['panel'].add(checkbox);
+        subPanel.add(climatePanel[layer]['panel']);
+      }
+      else if(layerCategory[i]==='Landscape variables:'){
+        landscapePanel[layer]['panel'] = ui.Panel();
+        checkbox = ui.Checkbox(layer, false);
+        if(layer==="Land Use Land Cover")
+          checkbox.onChange(createLulcClickHandler(inputData[layerCategory[i]][j],layer));
+        else if(layer==="Water Body")
+          checkbox.onChange(createWaterBodyClickHandler(inputData[layerCategory[i]][j]));
+        landscapePanel[layer]['panel'].add(checkbox);
+        subPanel.add(landscapePanel[layer]['panel']);
+      }
+      else if(layerCategory[i]==='Site suitability variables for RWH structures'){
+        checkbox = ui.Checkbox(inputData[layerCategory[i]][j].label, false);
+        checkbox.onChange(createRwhHandler(inputData[layerCategory[i]][j]));
+        subPanel.add(checkbox);
+      }
+      else if(layerCategory[i]==='Socio - Economic Variables'){
+        socioPanel[layer]['panel'] = ui.Panel();
+        checkbox = ui.Checkbox(layer, false);
+        checkbox.onChange(createSocioEconomicClickHandler(inputData[layerCategory[i]][j]));
+        socioPanel[layer]['panel'].add(checkbox);
+        subPanel.add(socioPanel[layer]['panel']);
+      }
+      else{
+        checkbox = ui.Checkbox(inputData[layerCategory[i]][j].label, false);
+        checkbox.onChange(createClickHandler(inputData[layerCategory[i]][j]));
+        subPanel.add(checkbox);
+      }
+    }
+  }
+}
+
+function createClickHandler(inputData) {
+  return function () {
+    if (inputData.value[1] === 0) {
+      var layerURL;
+      layerURL = ee.FeatureCollection(inputData.value[0]);
+      if(inputData.label==='Watersheds' || inputData.label==='Micro - Watersheds' || inputData.label ==="Basin" || inputData.label==="Sub - Basin"){
+        var block = ee.FeatureCollection(layers[idxOfLocation]['Administrative Boundaries'][2]['value'][0])
+        layerURL = layerURL.filterBounds(block);
+        layerURL = layerURL.style({
+          fillColor: '00000000', 
+        });
+      }
+      Map.addLayer(layerURL, {}, inputData.label);
+      Map.setCenter(inputData.value[2].long, inputData.value[2].lat, 10);
+      inputData.value[1] = 1;
+    } else 
+      removeLayer(inputData);
+  };
+}
+
+function createDrainageLinesClickHandler(inputData) {
+  return function () {
+    if (inputData.value[1] === 0) {
+      var layerURL = ee.Image.load(inputData.value[0]);
+      var backgroundColor = 0; // Adjust this value based on your image
+      var mask = layerURL.eq(backgroundColor);
+      layerURL = layerURL.updateMask(mask.not());
+      Map.addLayer(layerURL, {min:0,max:255}, inputData.label);
+      Map.setCenter(inputData.value[2].long, inputData.value[2].lat, 10);
+      inputData.value[1] = 1;
+    } else 
+      removeLayer(inputData);
+  };
+}
+
+function createWaterBodyClickHandler(inputData){
+   return function () {
+    if (inputData.value[1] === 0) {
+      
+      var layerURL = ee.FeatureCollection(inputData.value[0]);
+      waterBodyChart(layerURL);
+      Map.addLayer(layerURL, {}, inputData.label);
+      Map.setCenter(inputData.value[2].long, inputData.value[2].lat, 10);
+      inputData.value[1] = 1;
+    } else{ 
+      removeLayer(inputData);
+      landscapePanel['Water Body']['chartPanel']=undefined;
+    }
+  };
+}
+
+function createRwhHandler(inputData){
+  return function () {
+    if (inputData.value[1] === 0) {
+      var layerURL = ee.Image.load(inputData.value[0]);
+      var inputFeatureCollection = ee.FeatureCollection(layers[idxOfLocation]['Hydrological Layers'][1].value[0]);
+      if(inputData.label==="Clart" || inputData.label==="Lithology" || inputData.label==="Drainage Density" || inputData.label==="Slope Percentage"){
+        var invisibleFeatures = inputFeatureCollection.style({
+          fillColor: '00000000', // Transparent fill color (alpha set to 0)
+          color: '00000000',     // Transparent stroke color (alpha set to 0)
+        });
+        Map.addLayer(invisibleFeatures,{},inputData.label+"remove")
+      }
+      if(inputData.label==='Clart'){
+        clartChart(inputFeatureCollection,layerURL,inputData);
+        Map.addLayer(layerURL.selfMask().sldStyle(clart_sld),{min:74.89, max : 193.91, gamma : 0.40}, inputData.label);
+        addLegend("Clart Legend",clartPallete,clartNames,'Clart',"rwh")
+      }
+      else if(inputData.label === 'Lithology'){
+        var lith = layerURL.clip(inputFeatureCollection);
+        lithoChart(inputFeatureCollection,layerURL,inputData);
+        Map.addLayer(lith.sldStyle(litho_sld),{}, inputData.label);
+        addLegend("Lithology Legend",lithoPallete,lithoNames,'Lithology',"rwh")
+      }
+      else if(inputData.label === 'Lineament'){
+        var lin = layerURL.clip(inputFeatureCollection);
+        Map.addLayer(lin.sldStyle(lin_sld),{}, inputData.label);
+        addLegend("Lineament Legend",lineamentPallete,lineamentNames,"Lineament","rwh")
+      }
+      else if(inputData.label === 'Drainage Density'){
+        var dd = layerURL.clip(inputFeatureCollection);
+        
+        //Map.addLayer(layerURL,{},inputData.label+"KK");
+        var max = layerURL.reduceRegion({
+          reducer: ee.Reducer.max(),
+          geometry: inputFeatureCollection.geometry(),
+          scale: 30,
+          maxPixels: 1e9
+        });
+        
+        var min = layerURL.reduceRegion({
+          reducer: ee.Reducer.min(),
+          geometry: inputFeatureCollection.geometry(),
+          scale: 30,
+          maxPixels: 1e9
+        });
+        
+        
+        var maxValue = ee.Number(max.get('b1'))
+        var minValue = ee.Number(min.get('b1'))
+        var diff = maxValue.subtract(minValue)
+        var dd_l1 = maxValue.divide(3);
+        
+        var dd_s1 = ee.Number(1); // score for areas in range 0 to dd_l1
+        var dd_l2 = dd_l1.multiply(2);
+        var dd_s2 = ee.Number(2); // score for areas in range l1 to l2
+        var dd_s3 = ee.Number(3); // score for areas in range l2 to inf
+        
+        dd = dd.where(dd.lte(dd_l1), -1000);
+        dd = dd.where(dd.gt(dd_l1).and(dd.lte(dd_l2)), -2000);
+        dd = dd.where(dd.gt(dd_l2), -3000);
+        dd = dd.where(dd.eq(-1000), dd_s1);
+        dd = dd.where(dd.eq(-2000), dd_s2);
+        dd = dd.where(dd.eq(-3000), dd_s3);
+        drainageChart(inputFeatureCollection,dd,inputData);
+        Map.addLayer(dd.selfMask().sldStyle(drainage_colors),{},inputData.label);
+        addLegend("Drainage Density Legend",ddPallete,ddNames,'Drainage Density',"rwh")
+      }
+      else if(inputData.label === 'Slope Percentage'){
+        slopeChart(inputFeatureCollection,layerURL,inputData);
+        Map.addLayer(layerURL.selfMask().sldStyle(slopePercentage_colors),{min:0, max : 255}, inputData.label);
+        addLegend("Slope Percentage Legend",slopePercentagePallete,slopePercentageNames,'Slope Percentage',"rwh")
+      }
+      Map.setCenter(inputData.value[2].long, inputData.value[2].lat, 10);
+      inputData.value[1] = 1;
+    } else 
+      removeLayer(inputData);
+  };
+}
+
+function createAdministrativeClickHandler(inputData) {
+  return function () {
+    if (inputData.value[1] === 0) {
+      var layerURL = ee.FeatureCollection(inputData.value[0]);
+      if(inputData.label === 'State'){
+        layerURL = layerURL.filter(ee.Filter.eq('Name', curState));
+      }
+      else if(inputData.label==='Village'){
+        var toSearch = idxOfLocation;
+        if(curDistrict==='Angul')
+          toSearch = 'Anugul'
+        layerURL = layerURL.filter(ee.Filter.eq('Block_Name', toSearch));
+      }
+      else if(inputData.label==='District'){
+        var toSearch = curDistrict;
+        if(curDistrict==='Angul')
+          toSearch = 'Anugul'
+        layerURL = layerURL.filter(ee.Filter.eq('Name', toSearch));
+        // var block = ee.FeatureCollection(layers[idxOfLocation]['Administrative Boundaries'][2]['value'][0])
+        // layerURL = layerURL.filterBounds(block);
+        // print(layerURL)
+      }
+      
+      layerURL = layerURL.style({fillColor : '#ffffff00'});
+      
+      Map.addLayer(layerURL, {}, inputData.label);
+      Map.setCenter(inputData.value[2].long, inputData.value[2].lat, 10);
+      inputData.value[1] = 1;
+    } else 
+      removeLayer(inputData);
+  };
+}
+
+function createHydrologicalLayerClickHandler(inputData,layer) {
+  return function () {
+    
+    if(hydroPanel[layer]['yearPanel']){
+      hydroPanel[layer]['panel'].remove(hydroPanel[layer]['yearPanel']);
+      hydroPanel[layer]['panel'].remove(hydroPanel[layer]['seasonPanel']);
+      removeLayer(inputData);
+      hydroPanel[layer]['yearPanel'] = null;
+      return ;
+    }
+    initYearPanel(inputData,layer);
+  };
+}
+
+function createClimateVariableClickHandler(inputData,layer) {
+  return function () {
+    
+    if(climatePanel[layer]['yearPanel']){
+      climatePanel[layer]['panel'].remove(climatePanel[layer]['yearPanel']);
+      removeLayer(inputData);
+      climatePanel[layer]['yearPanel'] = null;
+      return ;
+    }
+    if(layer==="Drought Intensity")
+      initIntensityPanel(inputData,layer);
+    else if(layer==="Drought Frequency")
+      initFrequencyPanel(inputData,layer);
+    
+  };
+}
+
+function createSocioEconomicClickHandler(inputData) {
+  var layer = inputData.label;
+  return function () {
+    if(socioPanel[layer]['yearPanel']){
+      socioPanel[layer]['panel'].remove(socioPanel[layer]['yearPanel']);
+      removeLayer(inputData);
+      socioPanel[layer]['yearPanel'] = null;
+      return ;
+    }
+    
+    initSocioPanel(inputData,layer);
+    
+  };
+}
+
+function createWellDepthClickHandler(inputData,layer) {
+  return function () {
+    
+    if(hydroPanel[layer]['yearPanel']){
+      hydroPanel[layer]['panel'].remove(hydroPanel[layer]['yearPanel']);
+      removeLayer(inputData);
+      hydroPanel[layer]['yearPanel'] = null;
+      return ;
+    }
+    
+    initWellDepthPanel(inputData,layer);
+    
+  };
+}
+
+function createLulcClickHandler(inputData,layer) {
+  return function () {
+    if(landscapePanel[layer]['yearPanel']){
+      landscapePanel[layer]['panel'].remove(landscapePanel[layer]['yearPanel']);
+      landscapePanel[layer]['panel'].remove(landscapePanel[layer]['seasonPanel']);
+      removeLayer(inputData);
+      landscapePanel[layer]['yearPanel'] = null;
+      return ;
+    }
+    initLulcPanel(inputData,layer);
+    
+  };
+}
+
+//--------------------LEGENDS AND COLOR CODING FUNCTIONS--------------------------xxxxx
+
+//This function will set the ET,Runoff,deltaG,etc. properties on the layer 
+//according to the year and season
+var getLayer = function(layer,year,season){
+  return layer.map(function(feature){
+    var et = ee.Number(0),dg=ee.Number(0),g=ee.Number(0),p=ee.Number(0),r=ee.Number(0);
+    for(var i=0;i<seasonDates[season][year].length;i++){
+      var dic = ee.Dictionary(ee.String(feature.get(seasonDates[season][year][i])).decodeJSON());
+      var $et = ee.Number(dic.get('ET')).add(et);
+      var $dg = ee.Number(dic.get('DeltaG')).add(dg);
+      var $g = ee.Number(dic.get('G')).add(g);
+      var $p = ee.Number(dic.get('Precipitation')).add(p);
+      var $r = ee.Number(dic.get('RunOff')).add(r);
+      et = $et; dg = $dg; g = $g; p=$p;r=$r;
+    }
+    return feature.set('Evapotranspiration',et).set('Change in Groundwater',dg).set('g',g).set('Precipitation',p).set('Runoff',r);
+  });
+}
+
+var getClimateLayer = function(layer,year){
+  return layer.map(function(feature){
+    var et = ee.Number(0),dg=ee.Number(0),g=ee.Number(0),p=ee.Number(0),r=ee.Number(0);
+    for(var i=0;i<seasonDates[season][year].length;i++){
+      var dic = ee.Dictionary(ee.String(feature.get(seasonDates[season][year][i])).decodeJSON());
+      var $et = ee.Number(dic.get('ET')).add(et);
+      var $dg = ee.Number(dic.get('DeltaG')).add(dg);
+      var $g = ee.Number(dic.get('G')).add(g);
+      var $p = ee.Number(dic.get('Precipitation')).add(p);
+      var $r = ee.Number(dic.get('RunOff')).add(r);
+      et = $et; dg = $dg; g = $g; p=$p;r=$r;
+    }
+    return feature.set('Evapotranspiration',et).set('Change in Groundwater',dg).set('g',g).set('Precipitation',p).set('Runoff',r);
+  });
+}
+
+var colorCoding = function(table,featureName){
+  var buckets = 5;
+  var maxv = ee.Number(table.aggregate_max(featureName));
+  var minv = ee.Number(table.aggregate_min(featureName));
+  var m =  maxv.subtract(minv).divide(buckets).ceil();
+  var color_codes = ee.Dictionary(hydroColorCoding[featureName]);
+  var names = [];
+  //var newminv = ee.Number(minv).floor().int(),newm = ee.Number(m).floor().int();
+  var newminv = ee.Number(minv).floor().int().getInfo(),newm = ee.Number(m).floor().int().getInfo();
+  for(var i = 0; i<5;i++){
+    var tmp = newminv + newm;
+    var x = String(newminv) + "-" + String(tmp);
+    names.push(x)
+    newminv = newminv + newm;
+  }
+  if(featureName==='Precipitation')
+    addLegend("Precipitation(in mm)",precipitationPallete,names,"Precipitation","hydro")
+  else if(featureName==='Evapotranspiration')
+    addLegend("Evapotranspiration(in mm)",evapotranspirationPallete,names,"Evapotranspiration","hydro")
+  else if(featureName==='Runoff')
+    addLegend("Runoff(in mm)",runoffPallete,names,"Runoff","hydro")
+  else if(featureName==='Change in Groundwater')
+    addLegend("Change in Groundwater(in mm)",chgPallete,names,"Change in Groundwater","hydro")
+    
+    
+  var colorCodedCollection = table.map(function(feature){
+    var val = feature.get(featureName);
+    if(val === null)
+        return feature.set('style', color_codes.get('0.0'));
+    var bucket = ee.String(ee.Number(val).subtract(minv).floor().divide(m).floor());
+    return feature.set('style', color_codes.get(bucket));
+  });
+  
+  colorCodedCollection = colorCodedCollection.style({
+    styleProperty: 'style',
+  });
+  
+  return colorCodedCollection;
+}
+
+var colorCodingIntensity = function(loadedLayer,featureName){
+  var colorCodedCollection = loadedLayer.map(function(feature){
+    var val = ee.Number(feature.get(featureName));
+    return ee.Algorithms.If(val.lt(ee.Number(1)),setFeature(feature,"#FFFF00"),
+ee.Algorithms.If(val.lt(ee.Number(2)),setFeature(feature,"#FFA500"),setFeature(feature,"#FF0000"))
+ );
+  });
+  colorCodedCollection = colorCodedCollection.style({
+    styleProperty: 'style',
+  });
+
+  return colorCodedCollection;
+};
+
+var colorCodingFrequency = function(table,year,condition){
+  var str = "frequency";
+  var sev="_th_3_";
+  var buckets = 5;
+  if(condition === "Mild") sev = "_th_1_";
+  else if(condition === "Moderate") sev = "_th_2_";
+  var send = str+sev+year;
+  var draughtFrequencyColorCoding = ee.Dictionary({
+    '0.0' : {fillColor: '#FFDBAC',lineType:'dashed'},
+    '1.0' : {fillColor: '#F1C27D',lineType:'dashed'},
+    '2.0' : {fillColor: '#E0AC69',lineType:'dashed'},
+    '3.0' : {fillColor: '#C68642',lineType:'dashed'},
+    '4.0' : {fillColor: '#8D5524',lineType:'dashed'},
+  });
+  var maxv = ee.Number(table.aggregate_max(send));
+  var minv = ee.Number(table.aggregate_min(send));
+  var m =  maxv.subtract(minv).divide(buckets).ceil();
+  var color_codes = draughtFrequencyColorCoding;
+  var names = [];
+  //var newminv = ee.Number(minv).floor().int(),newm = ee.Number(m).floor().int();
+  var newminv = ee.Number(minv).floor().int().getInfo(),newm = ee.Number(m).floor().int().getInfo();
+  for(var i = 0; i<5;i++){
+    var tmp = newminv + newm;
+    var x = String(newminv) + "-" + String(tmp);
+    names.push(x)
+    newminv = newminv + newm;
+  }
+  addLegend("Drought Frequency Legend", frequencyPallete,names,"Drought Frequency","climate")
+  var colorCodedCollection = table.map(function(feature){
+    var val = feature.get(send);
+    if(val === null)
+        return feature.set('style', draughtFrequencyColorCoding.get('0.0'));
+    var bucket = ee.String(ee.Number(val).subtract(minv).floor().divide(m).floor());
+    return feature.set('style', draughtFrequencyColorCoding.get(bucket));
+  });
+  
+  colorCodedCollection = colorCodedCollection.style({
+    styleProperty: 'style',
+  });
+  
+  return colorCodedCollection;
+}
+
+var colorCodingWellDepth = function(loadedLayer,featureName){
+  
+  var colorCodedCollection = loadedLayer.map(function(feature){
+    var val = ee.Number(feature.get(featureName));
+    return ee.Algorithms.If(val.lt(ee.Number(-5)),setFeature(feature,"#FF0000"),
+ee.Algorithms.If(val.lt(ee.Number(-1)),setFeature(feature,"#FFA500"),
+ee.Algorithms.If(val.lt(ee.Number(1)),setFeature(feature,"#00FF00"),
+ee.Algorithms.If(val.gte(ee.Number(1)),setFeature(feature,"#0000FF"),setFeature(feature,"#000000"))
+) ) );
+  });
+  colorCodedCollection = colorCodedCollection.style({
+    styleProperty: 'style',
+  });
+
+  return colorCodedCollection;
+};
+
+
+var colorCodingSocioEconomic = function(table,adiName){
+  
+  var color_codes = ee.Dictionary({
+    '0.0' : {fillColor: 'red', color:'red', lineType:'dashed'},
+    '1.0' : {fillColor: 'yellow',lineType:'dashed'},
+    '2.0' : {fillColor: 'green',lineType:'dashed'},
+  });
+
+ var colorCodedCollection = table.map(function(feature1){
+    var val = ee.Number(feature1.get(adiName))
+    var bucket = ee.Algorithms.If(val.eq(ee.Number(9)),bucket='1.0',ee.Algorithms.If(val.lt(ee.Number(9)),bucket='0.0',bucket='2.0') )
+    return feature1.set('style', color_codes.get(bucket));
+  })
+ 
+ 
+  var fcVisCustom = colorCodedCollection.style({
+    styleProperty: 'style',
+  });
+  
+  return fcVisCustom;
+
+}
+
+var setFeature = function(feature,color){
+  return feature.set('style', {fillColor: color,lineType:'dashed'});
+};
+
+
+// ----------------x------------------x--------------------x----------------x----------------
+
+// var hydroChart = function(fc,property){
+//   var SEARCH_DISTANCE = 5000;  // Meters.
+//   function getProps(loc) {
+//     var thisFeature = getCurFeature(loc);
+      
+//     var myList = [];
+    
+//     for(var i = 0;i<l1.length;i++){
+//       var dic = ee.Dictionary(ee.String(thisFeature.get(l1[i])).decodeJSON());
+//       var toFind = property;
+//       if(property==='Evapotranspiration') toFind = 'ET';
+//       else if(property==="Runoff") toFind = 'RunOff';
+//       else if(property==="Change in Groundwater") toFind = 'DeltaG';
+//       myList.push(ee.Number(dic.get(toFind)));
+//     } 
+    
+//     //Create a feature collection with the dates and values
+//     var chartData = ee.FeatureCollection(l1.map(function(l1, index) {
+//       return ee.Feature(null, {
+//         'date': ee.Date(l1),
+//         'value': myList[index]
+//       });
+//     }));
+    
+//     // Create a time series chart
+//     var timeSeriesChart = ui.Chart.feature.byFeature({
+//       features: chartData,
+//       xProperty: 'date',
+//       yProperties: ['value']
+//     }).setOptions({
+//       title: 'Time Series Chart',
+//       vAxis: {title: property},
+//       hAxis: {title: 'Date'},
+//     });
+    
+//     if(hydroPanel[property]['chartPanel'])
+//       Map.remove(hydroPanel[property]['chartPanel']);
+//     var chartPanel = ui.Panel({
+//       widgets: [
+//         timeSeriesChart
+//       ],
+//       style: {
+//         position: 'top-left', // Position the panel at the top-left corner/ Set the width of the panel
+//       }
+//     });
+//     hydroPanel[property]['chartPanel'] = chartPanel;
+
+//     Map.add(hydroPanel[property]['chartPanel']);
+//   }
+//   hydroPanel[property]['onClickID'] = Map.onClick(getProps);
+// }
+
+var hydroChart = function(fc,property){
+  var SEARCH_DISTANCE = 5000;  // Meters.
+  function getProps(loc) {
+    loc = ee.Dictionary(loc);
+    var point = ee.Geometry.Point(loc.getNumber('lon'), loc.getNumber('lat'));
+    var thisFeature = fc.filterBounds(
+      point.buffer(SEARCH_DISTANCE)).map(function(ft) {
+        return ft.set('system:click_distance', point.distance(ft.geometry()));
+    })
+    .sort('system:click_distance').first();
+      
+    var myList = [];
+    
+    for(var i = 0;i<l1.length;i++){
+      var dic = ee.Dictionary(ee.String(thisFeature.get(l1[i])).decodeJSON());
+      var toFind = property;
+      if(property==='Evapotranspiration') toFind = 'ET';
+      else if(property==="Runoff") toFind = 'RunOff';
+      else if(property==="Change in Groundwater") toFind = 'DeltaG';
+      myList.push(ee.Number(dic.get(toFind)));
+    } 
+    var sum = ee.Number(0);
+    var prop = ee.String(property)
+    var comp = ee.String("Change in Groundwater")
+    //Create a feature collection with the dates and values
+    var chartData = ee.FeatureCollection(l1.map(function(l1, index) {
+      if(property==="Change in Groundwater")
+        sum = sum.add(ee.Number(myList[index]))
+      return ee.Feature(null, {
+        'date': ee.Date(l1),
+        'value': ee.Algorithms.If(prop.compareTo(comp),myList[index],sum)
+      });
+    }));
+    // Create a time series chart
+    var timeSeriesChart = ui.Chart.feature.byFeature({
+      features: chartData,
+      xProperty: 'date',
+      yProperties: ['value']
+    }).setOptions({
+      title: 'Time Series Chart',
+      vAxis: {title: property},
+      hAxis: {title: 'Date'},
+    });
+    
+    if(hydroPanel[property]['chartPanel'])
+      Map.remove(hydroPanel[property]['chartPanel']);
+    var chartPanel = ui.Panel({
+      widgets: [
+        timeSeriesChart
+      ],
+      style: {
+        position: 'top-left', // Position the panel at the top-left corner/ Set the width of the panel
+      }
+    });
+    hydroPanel[property]['chartPanel'] = chartPanel;
+
+    Map.add(hydroPanel[property]['chartPanel']);
+  }
+  hydroPanel[property]['onClickID'] = Map.onClick(getProps);
+}
+
+var waterBodyChart = function(fc){
+    
+  var SEARCH_DISTANCE = 5000;  // Meters.
+  function getProps(loc) {
+    loc = ee.Dictionary(loc);
+    var point = ee.Geometry.Point(loc.getNumber('lon'), loc.getNumber('lat'));
+    var thisFeature = fc.filterBounds(
+      point.buffer(SEARCH_DISTANCE)).map(function(ft) {
+        return ft.set('system:click_distance', point.distance(ft.geometry()));
+    })
+    .sort('system:click_distance').first();
+    
+    //Create a feature collection with the dates and values
+    var chartData = ee.FeatureCollection(waterBody.map(function(el, index) {
+      return ee.Feature(null, {
+        'Kharif': thisFeature.get(el[0]),
+        'Kharif & Rabi': thisFeature.get(el[1]),
+        'Kharif & Rabi & Zaid': thisFeature.get(el[2]),
+        'Year' : el[3],
+      });
+    }));
+    
+    var chart =
+    ui.Chart.feature
+        .byFeature({
+          features: chartData.select('Kharif|Kharif & Rabi|Kharif & Rabi & Zaid|Year'),
+          xProperty: 'Year',
+        })
+        .setSeriesNames([
+         '%Kharif','%Kharif & Rabi',' % Kharif & Rabi & Zaid' 
+        ])
+        .setChartType('ColumnChart')
+        .setOptions({
+          title:  '         % Area of Water Body in Kharif, Kharif + Rabi and Kharif + Rabi + Zaid',
+          hAxis:
+              {title: 'Year', titleTextStyle: {italic: false, bold: true}},
+          vAxis: {
+            title: 'Percentage',
+            titleTextStyle: {italic: false, bold: true}
+          },
+          colors: [
+            '#0373fc', '#fc9003', '#1db536'
+          ]
+        });
+    if(landscapePanel['Water Body']['chartPanel'])
+    Map.remove(landscapePanel['Water Body']['chartPanel']);
+    var chartPanel = ui.Panel({
+    widgets: [
+      chart
+    ],
+    style: {
+      position: 'top-left', // Position the panel at the top-left corner/ Set the width of the panel
+    }
+  });
+    landscapePanel['Water Body']['chartPanel'] = chartPanel;
+    Map.add(chartPanel);
+  }
+  landscapePanel['Water Body']['onClickID'] = Map.onClick(getProps);
+}
+
+var clartChart = function(fc,secLayer,inputData){
+  var worldCoverClassNames= clartNames;
+  // Define a list of class colors
+  var worldCoverPalette = clartPallete;
+  // We define a dictionary with class names
+  var classNames = ee.Dictionary.fromLists(
+    ['0.0','1.0','2.0','3.0','4.0','5.0'],
+    worldCoverClassNames
+  );
+  // We define a dictionary with class colors
+  var classColors = ee.Dictionary.fromLists(
+    ['0.0','1.0','2.0','3.0','4.0','5.0'],
+    worldCoverPalette
+  );
+    var SEARCH_DISTANCE = 5000;  // Meters.
+    function getProps(loc) {
+      loc = ee.Dictionary(loc);
+      var point = ee.Geometry.Point(loc.getNumber('lon'), loc.getNumber('lat'));
+      var thisFeature = fc.filterBounds(
+        point.buffer(SEARCH_DISTANCE)).map(function(ft) {
+          return ft.set('system:click_distance', point.distance(ft.geometry()));
+      })
+      .sort('system:click_distance').first();
+      var testing = secLayer.clip(thisFeature)
+      //Create a feature collection with the dates and values
+      var areaImage = ee.Image.pixelArea().divide(1e4);
+  
+    // Add the band containing classes
+    var areaImageWithClass = areaImage.addBands(testing);
+    // Create a chart
+    var ok =ee.FeatureCollection([testing]);
+    var chart = ui.Chart.image.byClass({
+      image: areaImageWithClass,
+      classBand: 'b1',
+      region: ok,
+      reducer: ee.Reducer.sum(),
+      scale: 10,
+    });
+  
+    var areas = areaImageWithClass.reduceRegion({
+        reducer: ee.Reducer.sum().group({
+        groupField: 1,
+        groupName: 'b1',
+      }),
+      geometry: ok,
+      scale: 10,
+      maxPixels: 1e10
+      }); 
+   
+  var classAreas = ee.List(areas.get('groups'));
+  
+  var classAreaList = classAreas.map(function(item) {
+    var areaDict = ee.Dictionary(item);
+    var classNumber = areaDict.getNumber('b1').format();
+    var classArea = areaDict.getNumber('sum');
+    var className = classNames.get(classNumber);
+    var classColor = classColors.get(classNumber);
+    // Create a feature with geometry and 
+    // required data as a dictionary
+    return ee.Feature(null, {
+      'class': classNumber,
+      'class_name': className,
+      'Area': classArea,
+      'color': classColor
+    });
+  });
+  
+  var classAreaFc = ee.FeatureCollection(classAreaList);
+  var colors = classAreaFc.aggregate_array('color');
+  
+  colors.evaluate(function(colorlist) {
+    // Let's create a Pie Chart
+    var chart = ui.Chart.feature.byFeature({
+      features: classAreaFc,
+      xProperty: 'class_name',
+      yProperties: ['Area']
+    }).setChartType('PieChart')
+      .setOptions({
+        title: 'Area by class',
+        colors: colorlist,
+        pieSliceBorderColor: '#fafafa',
+        pieSliceTextStyle: {'color': '#252525'}, 
+        pieSliceText: 'percentage',
+        sliceVisibilityThreshold: 0.10
+    });
+    if(rwhPanel[inputData.label]['chartPanel'])
+      Map.remove(rwhPanel[inputData.label]['chartPanel']);
+      var chartPanel = ui.Panel({
+      widgets: [
+        chart
+      ],
+      style: {
+        position: 'top-left', // Position the panel at the top-left corner/ Set the width of the panel
+      }
+    });
+      rwhPanel[inputData.label]['chartPanel'] = chartPanel;
+      Map.add(chartPanel);
+    
+  });
+    }
+  rwhPanel[inputData.label]['onClickID'] = Map.onClick(getProps);
+}
+
+var slopeChart = function(fc,secLayer,inputData){
+  var worldCoverClassNames= slopeNames;
+  // Define a list of class colors
+  var worldCoverPalette = slopePallete;
+  // We define a dictionary with class names
+  var classNames = ee.Dictionary.fromLists(
+    ['0','1','2','3','4','5','6','7','8','9','10'],
+    worldCoverClassNames
+  );
+  // We define a dictionary with class colors
+  var classColors = ee.Dictionary.fromLists(
+    ['0','1','2','3','4','5','6','7','8','9','10'],
+    worldCoverPalette
+  );
+    var SEARCH_DISTANCE = 5000;  // Meters.
+    function getProps(loc) {
+      loc = ee.Dictionary(loc);
+      var point = ee.Geometry.Point(loc.getNumber('lon'), loc.getNumber('lat'));
+      var thisFeature = fc.filterBounds(
+        point.buffer(SEARCH_DISTANCE)).map(function(ft) {
+          return ft.set('system:click_distance', point.distance(ft.geometry()));
+      })
+      .sort('system:click_distance').first();
+      var testing = secLayer.clip(thisFeature)
+      //Create a feature collection with the dates and values
+      var areaImage = ee.Image.pixelArea().divide(1e4);
+  
+    // Add the band containing classes
+    var areaImageWithClass = areaImage.addBands(testing);
+    // Create a chart
+    var ok =ee.FeatureCollection([testing]);
+    var chart = ui.Chart.image.byClass({
+      image: areaImageWithClass,
+      classBand: 'b1',
+      region: ok,
+      reducer: ee.Reducer.sum(),
+      scale: 10,
+    });
+  
+    var areas = areaImageWithClass.reduceRegion({
+        reducer: ee.Reducer.sum().group({
+        groupField: 1,
+        groupName: 'b1',
+      }),
+      geometry: ok,
+      scale: 10,
+      maxPixels: 1e10
+      }); 
+   
+  var classAreas = ee.List(areas.get('groups'));
+  
+  var classAreaList = classAreas.map(function(item) {
+    var areaDict = ee.Dictionary(item);
+    var classNumber = areaDict.getNumber('b1').format();
+    var classArea = areaDict.getNumber('sum');
+    var className = classNames.get(classNumber);
+    var classColor = classColors.get(classNumber);
+    // Create a feature with geometry and 
+    // required data as a dictionary
+    return ee.Feature(null, {
+      'class': classNumber,
+      'class_name': className,
+      'Area': classArea,
+      'color': classColor
+    });
+  });
+  
+  var classAreaFc = ee.FeatureCollection(classAreaList);
+  var colors = classAreaFc.aggregate_array('color');
+  
+  colors.evaluate(function(colorlist) {
+    // Let's create a Pie Chart
+    var chart = ui.Chart.feature.byFeature({
+      features: classAreaFc,
+      xProperty: 'class_name',
+      yProperties: ['Area']
+    }).setChartType('PieChart')
+      .setOptions({
+        title: 'Area by class',
+        colors: colorlist,
+        pieSliceBorderColor: '#fafafa',
+        pieSliceTextStyle: {'color': '#252525'}, 
+        pieSliceText: 'percentage',
+        sliceVisibilityThreshold: 0.10
+    });
+    if(rwhPanel[inputData.label]['chartPanel'])
+      Map.remove(rwhPanel[inputData.label]['chartPanel']);
+      var chartPanel = ui.Panel({
+      widgets: [
+        chart
+      ],
+      style: {
+        position: 'top-left', // Position the panel at the top-left corner/ Set the width of the panel
+      }
+    });
+      rwhPanel[inputData.label]['chartPanel'] = chartPanel;
+      Map.add(chartPanel);
+    
+  });
+    }
+  rwhPanel[inputData.label]['onClickID'] = Map.onClick(getProps);
+}
+
+var lithoChart = function(fc,secLayer,inputData){
+  var worldCoverClassNames= lithoNames;
+
+var worldCoverPalette = lithoPallete;
+// We define a dictionary with class names
+var classNames = ee.Dictionary.fromLists(
+  ['0.0','1.0','2.0','3.0','4.0','5.0','6.0','7.0','8.0','9.0','10.0'],
+  worldCoverClassNames
+);
+// We define a dictionary with class colors
+var classColors = ee.Dictionary.fromLists(
+  ['0.0','1.0','2.0','3.0','4.0','5.0','6.0','7.0','8.0','9.0','10.0'],
+  worldCoverPalette
+);
+  var SEARCH_DISTANCE = 5000;  // Meters.
+  function getProps(loc) {
+    loc = ee.Dictionary(loc);
+    var point = ee.Geometry.Point(loc.getNumber('lon'), loc.getNumber('lat'));
+    var thisFeature = fc.filterBounds(
+      point.buffer(SEARCH_DISTANCE)).map(function(ft) {
+        return ft.set('system:click_distance', point.distance(ft.geometry()));
+    })
+    .sort('system:click_distance').first();
+    var testing = secLayer.clip(thisFeature)
+    //Create a feature collection with the dates and values
+    var areaImage = ee.Image.pixelArea().divide(1e4);
+
+  // Add the band containing classes
+  var areaImageWithClass = areaImage.addBands(testing);
+  // Create a chart
+  var ok =ee.FeatureCollection([testing]);
+  var chart = ui.Chart.image.byClass({
+    image: areaImageWithClass,
+    classBand: 'b1',
+    region: ok,
+    reducer: ee.Reducer.sum(),
+    scale: 10,
+  });
+
+  var areas = areaImageWithClass.reduceRegion({
+      reducer: ee.Reducer.sum().group({
+      groupField: 1,
+      groupName: 'b1',
+    }),
+    geometry: ok,
+    scale: 10,
+    maxPixels: 1e10
+    }); 
+ 
+var classAreas = ee.List(areas.get('groups'));
+
+var classAreaList = classAreas.map(function(item) {
+  var areaDict = ee.Dictionary(item);
+  var classNumber = areaDict.getNumber('b1').format();
+  var classArea = areaDict.getNumber('sum');
+  var className = classNames.get(classNumber);
+  var classColor = classColors.get(classNumber);
+  // Create a feature with geometry and 
+  // required data as a dictionary
+  return ee.Feature(null, {
+    'class': classNumber,
+    'class_name': className,
+    'Area': classArea,
+    'color': classColor
+  });
+});
+
+var classAreaFc = ee.FeatureCollection(classAreaList);
+var colors = classAreaFc.aggregate_array('color');
+
+colors.evaluate(function(colorlist) {
+  // Let's create a Pie Chart
+  var chart = ui.Chart.feature.byFeature({
+    features: classAreaFc,
+    xProperty: 'class_name',
+    yProperties: ['Area']
+  }).setChartType('PieChart')
+    .setOptions({
+      title: 'Area by class',
+      colors: colorlist,
+      pieSliceBorderColor: '#fafafa',
+      pieSliceTextStyle: {'color': '#252525'}, 
+      pieSliceText: 'percentage',
+      sliceVisibilityThreshold: 0.10
+  });
+  if(rwhPanel[inputData.label]['chartPanel'])
+    Map.remove(rwhPanel[inputData.label]['chartPanel']);
+    var chartPanel = ui.Panel({
+    widgets: [
+      chart
+    ],
+    style: {
+      position: 'top-left', // Position the panel at the top-left corner/ Set the width of the panel
+    }
+  });
+    rwhPanel[inputData.label]['chartPanel'] = chartPanel;
+    Map.add(chartPanel);
+  
+});
+  }
+  rwhPanel[inputData.label]['onClickID'] = Map.onClick(getProps);
+}
+
+var drainageChart = function(fc,secLayer,inputData){
+  var worldCoverClassNames= ddNames;
+// Define a list of class colors
+var worldCoverPalette = ddPallete;
+// We define a dictionary with class names
+var classNames = ee.Dictionary.fromLists(
+  ['0.0','1.0','2.0','3.0'],
+  worldCoverClassNames
+);
+// We define a dictionary with class colors
+var classColors = ee.Dictionary.fromLists(
+  ['0.0','1.0','2.0','3.0'],
+  worldCoverPalette
+);
+  var SEARCH_DISTANCE = 5000;  // Meters.
+  function getProps(loc) {
+    loc = ee.Dictionary(loc);
+    var point = ee.Geometry.Point(loc.getNumber('lon'), loc.getNumber('lat'));
+    var thisFeature = fc.filterBounds(
+      point.buffer(SEARCH_DISTANCE)).map(function(ft) {
+        return ft.set('system:click_distance', point.distance(ft.geometry()));
+    })
+    .sort('system:click_distance').first();
+    var testing = secLayer.clip(thisFeature)
+    // testing = testing.expression('ceil(b())', {
+    //   b: testing
+    // });
+    //Create a feature collection with the dates and values
+    var areaImage = ee.Image.pixelArea().divide(1e4);
+
+  // Add the band containing classes
+  var areaImageWithClass = areaImage.addBands(testing);
+  // Create a chart
+  var ok =ee.FeatureCollection([testing]);
+  var chart = ui.Chart.image.byClass({
+    image: areaImageWithClass,
+    classBand: 'b1',
+    region: ok,
+    reducer: ee.Reducer.sum(),
+    scale: 10,
+  });
+
+  var areas = areaImageWithClass.reduceRegion({
+      reducer: ee.Reducer.sum().group({
+      groupField: 1,
+      groupName: 'b1',
+    }),
+    geometry: ok,
+    scale: 10,
+    maxPixels: 1e10
+    }); 
+ 
+var classAreas = ee.List(areas.get('groups'));
+var classAreaList = classAreas.map(function(item) {
+  var areaDict = ee.Dictionary(item);
+  var classNumber = areaDict.getNumber('b1').format();
+  var classArea = areaDict.getNumber('sum');
+  var className = classNames.get(classNumber);
+  var classColor = classColors.get(classNumber);
+  // Create a feature with geometry and 
+  // required data as a dictionary
+  return ee.Feature(null, {
+    'class': classNumber,
+    'class_name': className,
+    'Area': classArea,
+    'color': classColor
+  });
+});
+
+var classAreaFc = ee.FeatureCollection(classAreaList);
+var colors = classAreaFc.aggregate_array('color');
+
+colors.evaluate(function(colorlist) {
+  // Let's create a Pie Chart
+  var chart = ui.Chart.feature.byFeature({
+    features: classAreaFc,
+    xProperty: 'class_name',
+    yProperties: ['Area']
+  }).setChartType('PieChart')
+    .setOptions({
+      title: 'Area by class',
+      colors: colorlist,
+      pieSliceBorderColor: '#fafafa',
+      pieSliceTextStyle: {'color': '#252525'}, 
+      pieSliceText: 'percentage',
+      sliceVisibilityThreshold: 0.10
+  });
+  if(rwhPanel[inputData.label]['chartPanel'])
+    Map.remove(rwhPanel[inputData.label]['chartPanel']);
+    var chartPanel = ui.Panel({
+    widgets: [
+      chart
+    ],
+    style: {
+      position: 'top-left', // Position the panel at the top-left corner/ Set the width of the panel
+    }
+  });
+    rwhPanel[inputData.label]['chartPanel'] = chartPanel;
+    Map.add(chartPanel);
+  
+});
+  }
+  rwhPanel[inputData.label]['onClickID'] = Map.onClick(getProps);
+}
+
+var droughtChart = function(fc,curType){
+    
+  var SEARCH_DISTANCE = 5000;  // Meters.
+  function getProps(loc) {
+    loc = ee.Dictionary(loc);
+    var point = ee.Geometry.Point(loc.getNumber('lon'), loc.getNumber('lat'));
+    var thisFeature = fc.filterBounds(
+      point.buffer(SEARCH_DISTANCE)).map(function(ft) {
+        return ft.set('system:click_distance', point.distance(ft.geometry()));
+    })
+    .sort('system:click_distance').first();
+    //Create a feature collection with the dates and values
+    var droughtFeatures=[];
+    var type = curType === "Drought Intensity" ? "intensity" : "frequency";
+    for(var idx = 0; idx<droughtYears.length;idx++){
+        droughtFeatures.push(ee.Feature(null, {
+        'Mild': thisFeature.get(type+"_th_1_"+droughtYears[idx]),
+        'Moderate': thisFeature.get(type+"_th_2_"+droughtYears[idx]),
+        'Severe': thisFeature.get(type+"_th_3_"+droughtYears[idx]),
+        'Year' : droughtYears[idx],
+      }));
+    }
+    var chartData = ee.FeatureCollection(droughtFeatures);
+    
+    var chart =
+    ui.Chart.feature
+        .byFeature({
+          features: chartData.select('Mild|Moderate|Severe|Year'),
+          xProperty: 'Year',
+        })
+        .setSeriesNames([
+         '#Mild','#Moderate',' #Severe' 
+        ])
+        .setChartType('ColumnChart')
+        .setOptions({
+          title:  '         #Number of weeks of Mild, Moderate and Severe '+type+" per year",
+          hAxis:
+              {title: 'Year', titleTextStyle: {italic: false, bold: true}},
+          vAxis: {
+            title: 'Numbet of Weeks',
+            titleTextStyle: {italic: false, bold: true}
+          },
+          colors: [
+            '#0373fc', '#fc9003', '#1db536'
+          ]
+        });
+    if(climatePanel[curType]['chartPanel'])
+    Map.remove(climatePanel[curType]['chartPanel']);
+    var chartPanel = ui.Panel({
+    widgets: [
+      chart
+    ],
+    style: {
+      position: 'top-left', // Position the panel at the top-left corner/ Set the width of the panel
+    }
+  });
+    climatePanel[curType]['chartPanel'] = chartPanel;
+    Map.add(chartPanel);
+  }
+  climatePanel[curType]['onClickID'] = Map.onClick(getProps);
+}
+
+var socioChart = function(fc,property){
+  var SEARCH_DISTANCE = 5000;  // Meters.
+  function getProps(loc) {
+    loc = ee.Dictionary(loc);
+    var point = ee.Geometry.Point(loc.getNumber('lon'), loc.getNumber('lat'));
+    var thisFeature = fc.filterBounds(
+      point.buffer(SEARCH_DISTANCE)).map(function(ft) {
+        return ft.set('system:click_distance', point.distance(ft.geometry()));
+    })
+    .sort('system:click_distance').first();
+    var a = ["ADI 2011","ADI 2019"]
+    var b = ["ADI_2011","ADI_2019"]
+    var l1 = property==="Village ADI" ? b : a;
+    
+   
+    //Create a feature collection with the dates and values
+    var chartData = ee.FeatureCollection(l1.map(function(el, index) {
+      return ee.Feature(null, {
+        'date': el,
+        'value': thisFeature.get(el)
+      });
+    }));
+    // Create a time series chart
+    var timeSeriesChart = ui.Chart.feature.byFeature({
+      features: chartData,
+      xProperty: 'date',
+      yProperties: ['value']
+    }).setOptions({
+      title: 'Time Series Chart',
+      vAxis: {title: property},
+      hAxis: {title: 'Date'},
+    });
+    
+    if(socioPanel[property]['chartPanel'])
+      Map.remove(socioPanel[property]['chartPanel']);
+    var chartPanel = ui.Panel({
+      widgets: [
+        timeSeriesChart
+      ],
+      style: {
+        position: 'top-left', // Position the panel at the top-left corner/ Set the width of the panel
+      }
+    });
+    socioPanel[property]['chartPanel'] = chartPanel;
+
+    Map.add(socioPanel[property]['chartPanel']);
+  }
+  socioPanel[property]['onClickID'] = Map.onClick(getProps);
+}
+
+var addLegend = function(legendName, pallete, names,label,layerName)
+{
+  var howMany = pallete.length;
+  
+    var legendLULC = ui.Panel({
+    style: {
+      position: 'bottom-left',
+      padding: '8px 15px'
+    }
+  });
+   
+  // Create legend title
+  var legendTitle = ui.Label({
+    value: legendName,
+    style: {
+      fontWeight: 'bold',
+      fontSize: '18px',
+      margin: '0 0 4px 0',
+      padding: '0'
+      }
+  });
+  legendLULC.add(legendTitle);
+  var makeRow = function(color, name) {
+   
+        // Create the label that is actually the colored box.
+        var colorBox = ui.Label({
+          style: {
+            backgroundColor: '#' + color,
+            // Use padding to give the box height and width.
+            padding: '8px',
+            margin: '0 0 4px 0'
+          }
+        });
+   
+        // Create the label filled with the description text.
+        var description = ui.Label({
+          value: name,
+          style: {margin: '0 0 4px 6px'}
+        });
+   
+        // return the panel
+        return ui.Panel({
+          widgets: [colorBox, description],
+          layout: ui.Panel.Layout.Flow('horizontal')
+        });
+  };
+  // Add color and and names
+  for (var i = 0; i < howMany; i++) {
+    legendLULC.add(makeRow(pallete[i], names[i]));
+    } 
+   
+  // add legend to map (alternatively you can also print the legend to the console)
+  if(layerName==="rwh"){
+    if(rwhPanel[label]["legend"]) 
+      Map.remove(rwhPanel[label]["legend"]);
+    rwhPanel[label]["legend"] = legendLULC;
+  }
+  else if(layerName==="hydro"){
+    if(hydroPanel[label]["legend"]) 
+      Map.remove(hydroPanel[label]["legend"]);
+    hydroPanel[label]["legend"] = legendLULC;
+  }
+  else if(layerName==="climate"){
+    if(climatePanel[label]["legend"]) 
+      Map.remove(climatePanel[label]["legend"]);
+    climatePanel[label]["legend"] = legendLULC;
+  }
+  else if(layerName==="socioEconomic"){
+    if(socioPanel[label]["legend"]) 
+      Map.remove(socioPanel[label]["legend"]);
+    socioPanel[label]["legend"] = legendLULC;
+  }
+  else if(layerName==="lulc"){
+    if(landscapePanel[label]["legend"]) 
+      Map.remove(landscapePanel[label]["legend"]);
+    landscapePanel[label]["legend"] = legendLULC;
+  }
+  Map.add(legendLULC);
+}
+
+ui.root.add(panel);
